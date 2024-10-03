@@ -1,7 +1,6 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>
-#include <SDL_image.h>
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -36,42 +35,52 @@ string formatTime(int seconds)
            (secs < 10 ? "0" : "") + to_string(secs);
 }
 
-int main(int argc, char *argv[])
+// Hàm khai báo các điều kiện cần thiết và nhập thời gian
+int initAndInput(SDL_Window *&window, SDL_Renderer *&renderer, TTF_Font *&font, Mix_Chunk *&alarm)
 {
     // Khởi tạo SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
     {
         cout << "SDL không thể khởi tạo! SDL Error: " << SDL_GetError() << endl;
-        return -1;
+        exit(-1);
     }
 
     // Tạo cửa sổ
-    SDL_Window *window = SDL_CreateWindow("Đồng hồ điện tử đếm ngược", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("Đồng hồ điện tử đếm ngược", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+
     // Tạo renderer
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
     // Khởi tạo SDL_ttf
-    TTF_Init();
+    if (TTF_Init() == -1)
+    {
+        cout << "TTF không thể khởi tạo! TTF Error: " << TTF_GetError() << endl;
+        exit(-1);
+    }
     // Tải font chữ số điện tử
-    TTF_Font *font = TTF_OpenFont("data/Digital_Clock.otf", 100);
-    SDL_Color textColor = {0, 255, 0}; // Màu chữ xanh lá cho chữ số điện tử
+    font = TTF_OpenFont("data/Digital_Clock.otf", 100);
+    if (font == NULL)
+    {
+        cout << "Không thể tải font! TTF Error: " << TTF_GetError() << endl;
+        exit(-1);
+    }
 
     // Khởi tạo SDL_mixer
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
     {
         cout << "SDL_mixer không thể khởi tạo! SDL_mixer Error: " << Mix_GetError() << endl;
-        return -1;
+        exit(-1);
     }
 
     // Tải âm thanh cảnh báo
-    Mix_Chunk *alarm = Mix_LoadWAV("data/alarm.mp3");
+    alarm = Mix_LoadWAV("data/alarm.mp3");
     if (alarm == NULL)
     {
         cout << "Không thể tải âm thanh! SDL_mixer Error: " << Mix_GetError() << endl;
-        return -1;
+        exit(-1);
     }
 
-    // Nhập giờ, phút, giây
+    // Nhập thời gian
     int hours, minutes, seconds;
     do
     {
@@ -85,8 +94,13 @@ int main(int argc, char *argv[])
             cout << "Thời gian không hợp lệ! Vui lòng nhập lại." << endl;
     } while (hours < 0 || minutes < 0 || minutes >= 60 || seconds < 0 || seconds >= 60);
 
-    int countdownTime = hours * 3600 + minutes * 60 + seconds; // Chuyển đổi thành tổng số giây
+    return hours * 3600 + minutes * 60 + seconds; // Trả về tổng số giây
+}
 
+// Hàm xử lý và hiển thị đếm ngược
+void runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int countdownTime)
+{
+    SDL_Color textColor = {0, 255, 0}; // Màu chữ xanh lá cho chữ số điện tử
     bool running = true;
     SDL_Event e;
     Uint32 startTime = SDL_GetTicks(); // Lấy thời gian bắt đầu
@@ -161,6 +175,20 @@ int main(int argc, char *argv[])
         // Giới hạn tốc độ khung hình (60 FPS)
         SDL_Delay(1000 / 60);
     }
+}
+
+int main(int argc, char *argv[])
+{
+    SDL_Window *window = NULL;
+    SDL_Renderer *renderer = NULL;
+    TTF_Font *font = NULL;
+    Mix_Chunk *alarm = NULL;
+
+    // Khai báo và nhập thời gian
+    int countdownTime = initAndInput(window, renderer, font, alarm);
+
+    // Chạy đếm ngược
+    runCountdown(renderer, font, alarm, countdownTime);
 
     // Giải phóng tài nguyên
     close(window, renderer, font, alarm);

@@ -32,7 +32,7 @@ void init(SDL_Window *&window, SDL_Renderer *&renderer, TTF_Font *&font, Mix_Chu
         exit(-1);
     }
     // Tải font chữ số điện tử
-    font = TTF_OpenFont("data/Digital_Clock.otf", 50);
+    font = TTF_OpenFont("data/digital.ttf", 50);
     if (font == NULL)
     {
         cout << "Không thể tải font! TTF Error: " << TTF_GetError() << endl;

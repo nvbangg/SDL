@@ -178,14 +178,44 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
     return hours * 3600 + minutes * 60 + seconds;
 }
 
-// Hàm xử lý và hiển thị đếm ngược
-void runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int countdownTime)
+// Hàm vẽ nút
+void drawButton(SDL_Renderer *renderer, const string &label, SDL_Rect &buttonRect)
 {
-    SDL_Color textColor = {0, 255, 0}; // Màu chữ xanh lá
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderFillRect(renderer, &buttonRect);
+
+    TTF_Font *buttonFont = TTF_OpenFont("data/digital.ttf", 24);
+    SDL_Color textColor = {0, 0, 0}; // Màu chữ đen
+    SDL_Surface *textSurface = TTF_RenderText_Solid(buttonFont, label.c_str(), textColor);
+    SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+
+    int textWidth, textHeight;
+    SDL_QueryTexture(textTexture, NULL, NULL, &textWidth, &textHeight);
+    SDL_Rect textRect = {buttonRect.x + (buttonRect.w - textWidth) / 2, buttonRect.y + (buttonRect.h - textHeight) / 2, textWidth, textHeight};
+
+    SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+
+    SDL_FreeSurface(textSurface);
+    SDL_DestroyTexture(textTexture);
+    TTF_CloseFont(buttonFont);
+}
+
+// Hàm xử lý và hiển thị đếm ngược
+bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int &countdownTime)
+{
+    SDL_Color textColor = {0, 255, 0};       // Màu chữ xanh lá
+    SDL_Color pausedTextColor = {255, 0, 0}; // Màu chữ đỏ cho "Paused"
     bool running = true;
+    bool paused = false;
     SDL_Event e;
     Uint32 startTime = SDL_GetTicks();
+    Uint32 pauseStartTime = 0;
     int lastRemainingTime = -1;
+    int elapsedPausedTime = 0;
+
+    // Tạo nút "Pause" và "Reset"
+    SDL_Rect pauseButton = {WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT - 60, 80, 40};
+    SDL_Rect resetButton = {WINDOW_WIDTH / 2 + 20, WINDOW_HEIGHT - 60, 80, 40};
 
     while (running)
     {
@@ -195,31 +225,101 @@ void runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
             {
                 running = false;
             }
-        }
-
-        Uint32 currentTime = SDL_GetTicks();
-        int elapsedSeconds = (currentTime - startTime) / 1000;
-        int remainingTime = countdownTime - elapsedSeconds;
-
-        if (remainingTime < 0)
-        {
-            remainingTime = 0;
-        }
-
-        if (remainingTime != lastRemainingTime)
-        {
-            lastRemainingTime = remainingTime;
-
-            string timeText = (remainingTime > 0) ? formatTime(remainingTime) : "TIME OUT";
-
-            if (remainingTime == 0)
+            else if (e.type == SDL_MOUSEBUTTONDOWN)
             {
-                Mix_PlayChannel(-1, alarm, 0);
+                int x, y;
+                SDL_GetMouseState(&x, &y);
+
+                // Kiểm tra nhấn nút "Pause"
+                if (x >= pauseButton.x && x <= pauseButton.x + pauseButton.w &&
+                    y >= pauseButton.y && y <= pauseButton.y + pauseButton.h)
+                {
+                    paused = !paused; // Đảo trạng thái tạm dừng
+                    if (paused)
+                    {
+                        // Ghi lại thời điểm bắt đầu tạm dừng
+                        pauseStartTime = SDL_GetTicks();
+                    }
+                    else
+                    {
+                        // Cộng thêm thời gian tạm dừng vào tổng thời gian đã đếm
+                        elapsedPausedTime += SDL_GetTicks() - pauseStartTime;
+                    }
+                }
+
+                // Kiểm tra nhấn nút "Reset"
+                if (x >= resetButton.x && x <= resetButton.x + resetButton.w &&
+                    y >= resetButton.y && y <= resetButton.y + resetButton.h)
+                {
+                    return true; // Trả về true để gọi lại hàm nhập thời gian mới
+                }
+            }
+        }
+
+        // Cập nhật thời gian đếm ngược nếu không tạm dừng
+        if (!paused)
+        {
+            Uint32 currentTime = SDL_GetTicks();
+            int elapsedSeconds = (currentTime - startTime - elapsedPausedTime) / 1000; // Trừ thời gian đã tạm dừng
+            int remainingTime = countdownTime - elapsedSeconds;
+
+            if (remainingTime < 0)
+            {
+                remainingTime = 0;
             }
 
+            if (remainingTime != lastRemainingTime)
+            {
+                lastRemainingTime = remainingTime;
+
+                string timeText = (remainingTime > 0) ? formatTime(remainingTime) : "TIME OUT";
+
+                if (remainingTime == 0)
+                {
+                    Mix_PlayChannel(-1, alarm, 0);
+                }
+
+                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+                SDL_RenderClear(renderer);
+
+                // Hiển thị thời gian
+                SDL_Surface *textSurface = TTF_RenderText_Solid(font, timeText.c_str(), textColor);
+                SDL_Texture *timeTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+                SDL_FreeSurface(textSurface);
+
+                int textWidth, textHeight;
+                SDL_QueryTexture(timeTexture, NULL, NULL, &textWidth, &textHeight);
+                SDL_Rect renderQuad = {(WINDOW_WIDTH - textWidth) / 2, (WINDOW_HEIGHT - textHeight) / 2, textWidth, textHeight};
+
+                SDL_RenderCopy(renderer, timeTexture, NULL, &renderQuad);
+                SDL_DestroyTexture(timeTexture);
+
+                // Vẽ các nút "Pause" và "Reset"
+                drawButton(renderer, paused ? "Resume" : "Pause", pauseButton); // Nút đổi giữa "Pause" và "Resume"
+                drawButton(renderer, "Reset", resetButton);
+
+                SDL_RenderPresent(renderer);
+            }
+        }
+        else
+        {
+            // Khi tạm dừng, vẫn hiển thị thời gian và chữ "Paused"
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderClear(renderer);
 
+            // Hiển thị chữ "Paused"
+            SDL_Surface *pausedSurface = TTF_RenderText_Solid(font, "Paused", pausedTextColor);
+            SDL_Texture *pausedTexture = SDL_CreateTextureFromSurface(renderer, pausedSurface);
+            SDL_FreeSurface(pausedSurface);
+
+            int pausedTextWidth, pausedTextHeight;
+            SDL_QueryTexture(pausedTexture, NULL, NULL, &pausedTextWidth, &pausedTextHeight);
+            SDL_Rect pausedRect = {(WINDOW_WIDTH - pausedTextWidth) / 2, (WINDOW_HEIGHT - pausedTextHeight) / 4, pausedTextWidth, pausedTextHeight};
+            SDL_RenderCopy(renderer, pausedTexture, NULL, &pausedRect);
+            SDL_DestroyTexture(pausedTexture);
+
+            // Hiển thị thời gian hiện tại
+            string timeText = formatTime(lastRemainingTime);
             SDL_Surface *textSurface = TTF_RenderText_Solid(font, timeText.c_str(), textColor);
             SDL_Texture *timeTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
             SDL_FreeSurface(textSurface);
@@ -229,33 +329,50 @@ void runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
             SDL_Rect renderQuad = {(WINDOW_WIDTH - textWidth) / 2, (WINDOW_HEIGHT - textHeight) / 2, textWidth, textHeight};
 
             SDL_RenderCopy(renderer, timeTexture, NULL, &renderQuad);
-            SDL_RenderPresent(renderer);
-
             SDL_DestroyTexture(timeTexture);
+
+            // Vẽ các nút "Resume" và "Reset"
+            drawButton(renderer, "Resume", pauseButton); // Nút "Resume" khi đang tạm dừng
+            drawButton(renderer, "Reset", resetButton);
+
+            SDL_RenderPresent(renderer);
         }
 
         SDL_Delay(1000 / 60);
     }
+
+    return false; // Trả về false nếu không nhấn nút reset
 }
 
 int main(int argc, char *argv[])
 {
-    SDL_Window *window = NULL;
-    SDL_Renderer *renderer = NULL;
-    TTF_Font *font = NULL;
-    Mix_Chunk *alarm = NULL;
+    {
+        SDL_Window *window = NULL;
+        SDL_Renderer *renderer = NULL;
+        TTF_Font *font = NULL;
+        Mix_Chunk *alarm = NULL;
 
-    // Khởi tạo các điều kiện cần thiết
-    init(window, renderer, font, alarm);
+        // Khởi tạo các điều kiện cần thiết
+        init(window, renderer, font, alarm);
 
-    // Nhập thời gian
-    int countdownTime = inputTime(renderer, font);
+        bool reset = false;
+        do
+        {
+            // Xóa màn hình
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderClear(renderer);
+            SDL_RenderPresent(renderer);
 
-    // Chạy đếm ngược
-    runCountdown(renderer, font, alarm, countdownTime);
+            // Nhập thời gian
+            int countdownTime = inputTime(renderer, font);
 
-    // Giải phóng tài nguyên
-    close(window, renderer, font, alarm);
+            // Chạy đếm ngược
+            reset = runCountdown(renderer, font, alarm, countdownTime);
+        } while (reset);
 
-    return 0;
+        // Giải phóng tài nguyên
+        close(window, renderer, font, alarm);
+
+        return 0;
+    }
 }

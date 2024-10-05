@@ -48,6 +48,7 @@
         "xlocmes": "cpp",
         "xmemory": "cpp",
         "xtr1common": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "có_cửa sổ nhập": "c"
     }
 }

@@ -6,7 +6,7 @@
 using namespace std;
 
 const int WINDOW_WIDTH = 600;
-const int WINDOW_HEIGHT = 300;
+const int WINDOW_HEIGHT = 400;
 
 void handleError(const string &message, SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm)
 {
@@ -160,9 +160,9 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
     {
         try
         {
-            hours = stoi(inputText("Enter hours:", 50));
-            minutes = stoi(inputText("Enter minutes:", 100));
-            seconds = stoi(inputText("Enter seconds:", 150));
+            hours = stoi(inputText("Enter hours:", 70));
+            minutes = stoi(inputText("Enter minutes:", 170)); 
+            seconds = stoi(inputText("Enter seconds:", 270)); 
             validInput = true;
         }
         catch (const invalid_argument &)
@@ -200,6 +200,22 @@ void drawButton(SDL_Renderer *renderer, const string &label, SDL_Rect &buttonRec
     TTF_CloseFont(buttonFont);
 }
 
+void drawProgressBar(SDL_Renderer *renderer, int totalTime, int remainingTime)
+{
+    int barWidth = WINDOW_WIDTH - 100;
+    int barHeight = 20;
+    int filledWidth = (remainingTime * barWidth) / totalTime;
+
+    SDL_Rect progressBar = {50, 20, barWidth, barHeight};
+    SDL_Rect filledBar = {50, 20, filledWidth, barHeight};
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    SDL_RenderFillRect(renderer, &progressBar);
+
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    SDL_RenderFillRect(renderer, &filledBar);
+}
+
 bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int &countdownTime)
 {
     SDL_Color textColor = {0, 255, 0};
@@ -214,6 +230,14 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
 
     SDL_Rect pauseButton = {WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT - 60, 80, 40};
     SDL_Rect resetButton = {WINDOW_WIDTH / 2 + 20, WINDOW_HEIGHT - 60, 80, 40};
+
+    // Increase font size for countdown
+    TTF_Font *largeFont = TTF_OpenFont("data/digital.ttf", 100);
+    if (!largeFont)
+    {
+        cerr << "Không thể tải font! TTF Error: " << TTF_GetError() << endl;
+        return false;
+    }
 
     while (running)
     {
@@ -245,6 +269,7 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
                 if (x >= resetButton.x && x <= resetButton.x + resetButton.w &&
                     y >= resetButton.y && y <= resetButton.y + resetButton.h)
                 {
+                    TTF_CloseFont(largeFont);
                     return true;
                 }
             }
@@ -275,7 +300,9 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
                 SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
                 SDL_RenderClear(renderer);
 
-                SDL_Surface *textSurface = TTF_RenderText_Solid(font, timeText.c_str(), textColor);
+                drawProgressBar(renderer, countdownTime, remainingTime);
+
+                SDL_Surface *textSurface = TTF_RenderText_Solid(largeFont, timeText.c_str(), textColor);
                 SDL_Texture *timeTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
                 SDL_FreeSurface(textSurface);
 
@@ -316,7 +343,7 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
             SDL_DestroyTexture(pausedTexture);
 
             string timeText = formatTime(lastRemainingTime);
-            SDL_Surface *textSurface = TTF_RenderText_Solid(font, timeText.c_str(), textColor);
+            SDL_Surface *textSurface = TTF_RenderText_Solid(largeFont, timeText.c_str(), textColor);
             SDL_Texture *timeTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
             SDL_FreeSurface(textSurface);
 
@@ -336,6 +363,7 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
         SDL_Delay(1000 / 60);
     }
 
+    TTF_CloseFont(largeFont);
     return false;
 }
 

@@ -161,8 +161,8 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
         try
         {
             hours = stoi(inputText("Enter hours:", 70));
-            minutes = stoi(inputText("Enter minutes:", 170)); 
-            seconds = stoi(inputText("Enter seconds:", 270)); 
+            minutes = stoi(inputText("Enter minutes:", 170));
+            seconds = stoi(inputText("Enter seconds:", 270));
             validInput = true;
         }
         catch (const invalid_argument &)
@@ -171,7 +171,8 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
         }
     }
 
-    return hours * 3600 + minutes * 60 + seconds;
+    int totalSeconds = hours * 3600 + minutes * 60 + seconds;
+    return totalSeconds;
 }
 
 void drawButton(SDL_Renderer *renderer, const string &label, SDL_Rect &buttonRect)
@@ -237,6 +238,59 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
     {
         cerr << "Không thể tải font! TTF Error: " << TTF_GetError() << endl;
         return false;
+    }
+
+    // Kiểm tra nếu thời gian đếm ngược là 0
+    if (countdownTime == 0)
+    {
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
+
+        // Hiển thị TIME OUT ngay lập tức
+        string timeText = "TIME OUT";
+        Mix_PlayChannel(-1, alarm, 0); // Phát âm thanh cảnh báo
+
+        SDL_Surface *textSurface = TTF_RenderText_Solid(largeFont, timeText.c_str(), textColor);
+        SDL_Texture *timeTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+        SDL_FreeSurface(textSurface);
+
+        int textWidth, textHeight;
+        SDL_QueryTexture(timeTexture, NULL, NULL, &textWidth, &textHeight);
+        SDL_Rect renderQuad = {(WINDOW_WIDTH - textWidth) / 2, (WINDOW_HEIGHT - textHeight) / 2, textWidth, textHeight};
+
+        SDL_RenderCopy(renderer, timeTexture, NULL, &renderQuad);
+        SDL_DestroyTexture(timeTexture);
+
+        resetButton.x = (WINDOW_WIDTH - resetButton.w) / 2;
+        drawButton(renderer, "Reset", resetButton);
+
+        SDL_RenderPresent(renderer);
+
+        // Đợi người dùng nhấn nút reset
+        bool reset = false;
+        while (!reset)
+        {
+            while (SDL_PollEvent(&e) != 0)
+            {
+                if (e.type == SDL_QUIT)
+                {
+                    running = false;
+                    reset = true;
+                }
+                else if (e.type == SDL_MOUSEBUTTONDOWN)
+                {
+                    int x, y;
+                    SDL_GetMouseState(&x, &y);
+
+                    if (x >= resetButton.x && x <= resetButton.x + resetButton.w &&
+                        y >= resetButton.y && y <= resetButton.y + resetButton.h)
+                    {
+                        TTF_CloseFont(largeFont);
+                        return true; // Nhấn reset
+                    }
+                }
+            }
+        }
     }
 
     while (running)

@@ -1,6 +1,6 @@
-#include "make/sdl_utils.h" 
-#include <iostream>        
-using namespace std;      
+#include "make/sdl_utils.h"
+#include <iostream>
+using namespace std;
 
 // Hàm handleError xử lý lỗi và giải phóng tài nguyên
 // message: Thông báo lỗi cần hiển thị
@@ -34,29 +34,29 @@ void initSDL(SDL_Window *&window, SDL_Renderer *&renderer, TTF_Font *&font, Mix_
 {
     // Khởi tạo SDL và kiểm tra lỗi
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
-        handleError("SDL không thể khởi tạo!", window, renderer, font, alarm);
+        handleError("SDL could not initialize!", window, renderer, font, alarm);
     // Tạo cửa sổ và kiểm tra lỗi
-    window = SDL_CreateWindow("Đồng hồ điện tử đếm ngược", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 400, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("Countdown Timer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 400, SDL_WINDOW_SHOWN);
     if (!window)
-        handleError("Không thể tạo cửa sổ!", window, renderer, font, alarm);
+        handleError("Window could not be created!", window, renderer, font, alarm);
     // Tạo renderer và kiểm tra lỗi
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer)
-        handleError("Không thể tạo renderer!", window, renderer, font, alarm);
+        handleError("Renderer could not be created!", window, renderer, font, alarm);
     // Khởi tạo SDL_ttf và kiểm tra lỗi
     if (TTF_Init() == -1)
-        handleError("TTF không thể khởi tạo!", window, renderer, font, alarm);
+        handleError("TTF could not initialize!", window, renderer, font, alarm);
     // Tải font và kiểm tra lỗi
     font = TTF_OpenFont("data/digital.ttf", 50);
     if (!font)
-        handleError("Không thể tải font!", window, renderer, font, alarm);
+        handleError("Font could not be loaded!", window, renderer, font, alarm);
     // Khởi tạo SDL_mixer và kiểm tra lỗi
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
-        handleError("SDL_mixer không thể khởi tạo!", window, renderer, font, alarm);
+        handleError("SDL_mixer could not initialize!", window, renderer, font, alarm);
     // Tải âm thanh và kiểm tra lỗi
     alarm = Mix_LoadWAV("data/alarm.mp3");
     if (!alarm)
-        handleError("Không thể tải âm thanh!", window, renderer, font, alarm); 
+        handleError("Sound could not be loaded!", window, renderer, font, alarm);
 
     SDL_StartTextInput(); // Bắt đầu nhận đầu vào văn bản từ người dùng
 }

@@ -6,9 +6,9 @@ using namespace std;
 
 int inputTime(SDL_Renderer *renderer, TTF_Font *font)
 {
-    // Thiết lập màu vẽ cho renderer (màu đen)
+    // Thiết lập màu vẽ cho renderer (màu đen, không trong suốt)
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    // Xóa renderer với màu đã thiết lập
+    // Xóa renderer với màu đã thiết lập (tô toàn bộ renderer bằng màu đen)
     SDL_RenderClear(renderer);
     // Hiển thị renderer lên cửa sổ
     SDL_RenderPresent(renderer);
@@ -81,17 +81,20 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
         }
 
         // Xóa màn hình và hiển thị đồng hồ lớn màu xanh lá
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Đặt màu vẽ là màu đen
+        SDL_RenderClear(renderer); // Xóa màn hình với màu vẽ hiện tại
 
         string formattedTime = inputText.substr(0, 2) + ":" + inputText.substr(2, 2) + ":" + inputText.substr(4, 2); // Định dạng thời gian
 
+        //Tạo texture chứa chữ xanh lá với font
         SDL_Surface *textSurface = TTF_RenderText_Solid(largeFont, formattedTime.c_str(), textColor); // Tạo surface chứa chữ
         SDL_Texture *textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);               // Tạo texture từ surface
 
         int textWidth, textHeight;
-        SDL_QueryTexture(textTexture, NULL, NULL, &textWidth, &textHeight);                                // Lấy kích thước của texture
-        SDL_Rect renderQuad = {(600 - textWidth) / 2, (400 - textHeight) / 2 - 80, textWidth, textHeight}; // Đặt vị trí và kích thước của chữ
+        // Lấy kích thước của texture
+        SDL_QueryTexture(textTexture, NULL, NULL, &textWidth, &textHeight);
+        // Đặt vị trí và kích thước của chữ
+        SDL_Rect renderQuad = {(600 - textWidth) / 2, (400 - textHeight) / 2 - 80, textWidth, textHeight}; 
 
         SDL_RenderCopy(renderer, textTexture, NULL, &renderQuad); // Vẽ chữ lên màn hình
         SDL_FreeSurface(textSurface);                             // Giải phóng surface

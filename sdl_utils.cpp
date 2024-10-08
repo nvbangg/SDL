@@ -40,17 +40,19 @@ void initSDL(SDL_Window *&window, SDL_Renderer *&renderer, TTF_Font *&font, Mix_
     if (!window)
         handleError("Window could not be created!", window, renderer, font, alarm);
     // Tạo renderer và kiểm tra lỗi
+    // Tạo renderer SDL với cửa sổ đã tạo, sử dụng driver mặc định (-1), và sử dụng tăng tốc phần cứng
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!renderer)
         handleError("Renderer could not be created!", window, renderer, font, alarm);
     // Khởi tạo SDL_ttf và kiểm tra lỗi
-    if (TTF_Init() == -1)
+    if (TTF_Init() == -1) 
         handleError("TTF could not initialize!", window, renderer, font, alarm);
     // Tải font và kiểm tra lỗi
     font = TTF_OpenFont("data/digital.ttf", 50);
     if (!font)
         handleError("Font could not be loaded!", window, renderer, font, alarm);
     // Khởi tạo SDL_mixer và kiểm tra lỗi
+    // sử dụng âm thanh với tần số 44100 Hz, định dạng mặc định, 2 kênh (stereo), và buffer size 2048
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
         handleError("SDL_mixer could not initialize!", window, renderer, font, alarm);
     // Tải âm thanh và kiểm tra lỗi

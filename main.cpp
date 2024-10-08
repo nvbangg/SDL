@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     TTF_Font *font = NULL;        // Con trỏ tới font chữ SDL
     Mix_Chunk *alarm = NULL;      // Con trỏ tới âm thanh báo động SDL
 
-    // Khởi tạo SDL và các thành phần liên quan
+    // Khởi tạo và kiểm tra lỗi các thành phần liên quan
     initSDL(window, renderer, font, alarm);
 
     bool reset = false; // Biến để kiểm tra xem có cần reset đếm ngược không

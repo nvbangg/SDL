@@ -73,12 +73,13 @@ void closeSDL(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, Mix_Ch
     if (font)
         TTF_CloseFont(font); // Giải phóng font nếu nó đã được khởi tạo
     if (alarm)
-        Mix_FreeChunk(alarm); // Giải phóng âm thanh nếu nó đã được khởi tạo
-    Mix_CloseAudio();         // Đóng âm thanh
-    TTF_Quit();               // Kết thúc SDL_ttf
+        Mix_FreeChunk(alarm); // Giải phóng âm thanh nếu nó đã được khởi tạo            // Đóng âm thanh             // Kết thúc SDL_ttf
     if (renderer)
         SDL_DestroyRenderer(renderer); // Giải phóng renderer nếu nó đã được khởi tạo
     if (window)
         SDL_DestroyWindow(window); // Giải phóng cửa sổ nếu nó đã được khởi tạo
+    Mix_CloseAudio();              // Đóng âm thanh
+    TTF_Quit();                    // Kết thúc SDL_ttf
+    Mix_Quit();                    // Kết thúc SDL_mixer
     SDL_Quit();                    // Kết thúc SDL
 }

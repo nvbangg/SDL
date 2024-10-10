@@ -56,10 +56,10 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
 
         SDL_Surface *textSurface = TTF_RenderText_Solid(largeFont, timeText.c_str(), textColor); // Tạo surface chứa chữ
         SDL_Texture *timeTexture = SDL_CreateTextureFromSurface(renderer, textSurface);          // Tạo texture từ surface
-        SDL_FreeSurface(textSurface);                                                            // Giải phóng surface
+        SDL_FreeSurface(textSurface); // Giải phóng surface
 
         int textWidth, textHeight;
-        SDL_QueryTexture(timeTexture, NULL, NULL, &textWidth, &textHeight);                           // Lấy kích thước của texture
+        SDL_QueryTexture(timeTexture, NULL, NULL, &textWidth, &textHeight); // Lấy kích thước của texture
         SDL_Rect renderQuad = {(600 - textWidth) / 2, (400 - textHeight) / 2, textWidth, textHeight}; // Đặt vị trí và kích thước của chữ
 
         SDL_RenderCopy(renderer, timeTexture, NULL, &renderQuad); // Vẽ chữ lên màn hình

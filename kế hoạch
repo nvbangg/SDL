@@ -1,4 +1,3 @@
-Lưu và tải cấu hình:
 
 Lưu cấu hình: Lưu thời gian đếm ngược và các thiết lập khác vào một file cấu hình để người dùng có thể tiếp tục từ lần sử dụng trước.
 Tải cấu hình: Tải cấu hình từ file khi khởi động chương trình.
@@ -6,20 +5,3 @@ Tải cấu hình: Tải cấu hình từ file khi khởi động chương trìn
 thêm số mili giây vào thời gian đếm ngược
 Thay đổi giao diện (UI)
 Thay đổi màu sắc giao diện theo thời gian: màu xanh khi thời gian còn nhiều màu đỏ khi thời gian còn ít (ví dụ 10 giây cuối).
-
-Tùy chọn âm thanh
-Thêm tùy chọn cho người dùng chọn nhạc chuông hoặc âm thanh cảnh báo khi hết giờ (cho phép người dùng chọn từ một danh sách âm thanh có sẵn).
-Điều chỉnh âm lượng của âm thanh báo động.
-
-Chế độ toàn màn hình
-
-Thêm tùy chọn cho người dùng chuyển sang chế độ toàn màn hình hoặc thay đổi kích thước cửa sổ để có trải nghiệm lớn hơn.
-
-Lịch sử và thống kê thời gian
-Lưu lại lịch sử các lần đếm ngược và cho phép người dùng xem lại thời gian đã sử dụng cho mỗi lần đếm ngược.
-Hiển thị thống kê về tổng thời gian đã đếm ngược hoặc số lần người dùng đã sử dụng chương trình.
-
-
- Tính năng ghi chú (Notes Feature)
-Mô tả: Cho phép người dùng viết ghi chú hoặc nhiệm vụ đi kèm với mỗi thời gian đếm ngược.
-Thực hiện: Tạo hộp thoại nhập văn bản khi người dùng nhập thời gian đếm ngược, hiển thị ghi chú trên giao diện hoặc lưu lại.

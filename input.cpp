@@ -29,9 +29,6 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
         digitButtons[i] = {WINDOW_WIDTH / 2 - 240 + (i - 5) * 100, WINDOW_HEIGHT / 2 + 110, 80, 40};
     }
 
-    // Mở font chữ lớn với kích thước 100
-    TTF_Font *largeFont = TTF_OpenFont("data/digital.ttf", 100);
-
     // Vòng lặp nhập liệu
     while (!done)
     {
@@ -81,7 +78,7 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
         // Định dạng thời gian
         string formattedTime = inputText.substr(0, 2) + ":" + inputText.substr(2, 2) + ":" + inputText.substr(4, 2);
         // Vẽ thời gian lên màn hình
-        drawText(renderer, largeFont, formattedTime.c_str(), TIME_COLOR, 0, -80);
+        drawText(renderer, font, formattedTime.c_str(), TIME_COLOR, 0, -80);
 
         // Vẽ nút Start và Clear
         drawButton(renderer, "Start", startButton);
@@ -96,9 +93,6 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
         // Hiển thị renderer lên cửa sổ
         SDL_RenderPresent(renderer);
     }
-
-    // Đóng font
-    TTF_CloseFont(largeFont);
 
     // Chuyển đổi input thành thời gian
     int hours = stoi(inputText.substr(0, 2));

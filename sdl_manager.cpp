@@ -46,7 +46,7 @@ void initSDL(SDL_Window *&window, SDL_Renderer *&renderer, TTF_Font *&font, Mix_
     if (TTF_Init() == -1)
         handleError("TTF could not initialize!", window, renderer, font, alarm);
     // Tải font và kiểm tra lỗi
-    font = TTF_OpenFont("data/digital.ttf", 50);
+    font = TTF_OpenFont("data/digital.ttf", 100);
     if (!font)
         handleError("Font could not be loaded!", window, renderer, font, alarm);
     // Khởi tạo SDL_mixer và kiểm tra lỗi

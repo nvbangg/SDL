@@ -29,13 +29,12 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
     int lastRemainingTime = -1;
     // Tổng thời gian đã tạm dừng
     int elapsedPausedTime = 0;
+    // Mở font chữ với kích thước 50
+    TTF_Font *textFont = TTF_OpenFont("data/digital.ttf", 50);
 
     // Nút Pause và Reset nằm ở dưới cùng của màn hình
     SDL_Rect pauseButton = {WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 + 50, 80, 40};
     SDL_Rect resetButton = {WINDOW_WIDTH / 2 + 20, WINDOW_HEIGHT / 2 + 50, 80, 40};
-
-    // Mở font chữ lớn với kích thước 100
-    TTF_Font *largeFont = TTF_OpenFont("data/digital.ttf", 100);
 
     // Kiểm tra nếu thời gian đếm ngược là 0
     if (countdownTime == 0)
@@ -49,7 +48,7 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
         Mix_PlayChannel(-1, alarm, 0);
 
         // Vẽ thời gian lên màn hình
-        drawText(renderer, largeFont, timeText.c_str(), TIME_COLOR, 0, -80);
+        drawText(renderer, font, timeText.c_str(), TIME_COLOR, 0, -80);
 
         // Đặt lại vị trí nút Reset
         resetButton.x = (WINDOW_WIDTH - resetButton.w) / 2;
@@ -82,8 +81,6 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
                     // Sử dụng hàm kiểm tra nhấn nút
                     if (checkClickButton(x, y, resetButton))
                     {
-                        // Đóng font
-                        TTF_CloseFont(largeFont);
                         // Trả về true để reset
                         return true;
                     }
@@ -129,8 +126,6 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
 
                 if (checkClickButton(x, y, resetButton))
                 {
-                    // Đóng font
-                    TTF_CloseFont(largeFont);
                     // Trả về true để reset
                     return true;
                 }
@@ -175,7 +170,7 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
                 drawProgressBar(renderer, countdownTime, remainingTime);
 
                 // Vẽ thời gian lên màn hình
-                drawText(renderer, largeFont, timeText.c_str(), TIME_COLOR, 0, -80);
+                drawText(renderer, font, timeText.c_str(), TIME_COLOR, 0, -80);
 
                 if (remainingTime > 0)
                 {
@@ -200,13 +195,13 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
         {
             // Thiết lập màu nền cho renderer
             clearRenderer(renderer, BACKGROUND_COLOR);
-
-            drawText(renderer, font, "Paused", PAUSE_TEXT_COLOR, 0, -150);
+            //Vẽ chữ Paused
+            drawText(renderer, textFont, "Paused", PAUSE_TEXT_COLOR, 0, -150);
 
             // Định dạng thời gian còn lại
             string timeText = formatTime(lastRemainingTime);
             // Vẽ thời gian lên màn hình
-            drawText(renderer, largeFont, timeText.c_str(), TIME_COLOR, 0, -80);
+            drawText(renderer, font, timeText.c_str(), TIME_COLOR, 0, -80);
 
             // Vẽ nút Resume
             drawButton(renderer, "Resume", pauseButton);
@@ -222,7 +217,7 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
     }
 
     // Đóng font
-    TTF_CloseFont(largeFont);
+    TTF_CloseFont(textFont);
     // Trả về false nếu không cần reset
     return false;
 }

@@ -49,7 +49,7 @@ void drawButton(SDL_Renderer *renderer, const string &label, SDL_Rect &buttonRec
     // Vẽ hình chữ nhật của nút bấm
     SDL_RenderFillRect(renderer, &buttonRect);
 
-    // Mở font chữ với kích thước 24
+    // Mở font chữ với kích thước 26
     TTF_Font *buttonFont = TTF_OpenFont("data/digital.ttf", 26);
 
     // Đặt màu chữ

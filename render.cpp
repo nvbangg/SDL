@@ -7,7 +7,7 @@ void clearRenderer(SDL_Renderer *renderer, SDL_Color color)
     SDL_RenderClear(renderer);
 }
 
-//Check click button
+// Check click button
 bool checkClickButton(int x, int y, const SDL_Rect &button)
 {
     return (x >= button.x && x <= button.x + button.w &&
@@ -50,13 +50,7 @@ void drawButton(SDL_Renderer *renderer, const string &label, SDL_Rect &buttonRec
     SDL_RenderFillRect(renderer, &buttonRect);
 
     // Mở font chữ với kích thước 24
-    TTF_Font *buttonFont = TTF_OpenFont("data/digital.ttf", 24);
-    if (!buttonFont)
-    {
-        // Hiển thị lỗi nếu không thể tải font
-        cerr << "Không thể tải font! TTF Error: " << TTF_GetError() << endl;
-        return;
-    }
+    TTF_Font *buttonFont = TTF_OpenFont("data/digital.ttf", 26);
 
     // Đặt màu chữ
     SDL_Color textColor = TEXT_COLOR;
@@ -82,6 +76,7 @@ void drawButton(SDL_Renderer *renderer, const string &label, SDL_Rect &buttonRec
     TTF_CloseFont(buttonFont);
 }
 
+// Hàm vẽ thời gian
 void drawTime(SDL_Renderer *renderer, TTF_Font *font, const string &timeText)
 {
     // Đặt màu chữ

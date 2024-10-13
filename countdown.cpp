@@ -36,11 +36,6 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
 
     // Mở font chữ lớn với kích thước 100
     TTF_Font *largeFont = TTF_OpenFont("data/digital.ttf", 100);
-    if (!largeFont)
-    {
-        cerr << "Không thể tải font! TTF Error: " << TTF_GetError() << endl;
-        return false;
-    }
 
     // Kiểm tra nếu thời gian đếm ngược là 0
     if (countdownTime == 0)

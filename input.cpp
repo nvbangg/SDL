@@ -7,8 +7,6 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
     // Hiển thị renderer lên cửa sổ
     SDL_RenderPresent(renderer);
 
-    // Màu xanh lá cho đồng hồ (đã khai báo trong common.h)
-    SDL_Color textColor = TIME_COLOR;
     // Chuỗi ký tự ban đầu cho thời gian
     string inputText = "000000";
     // Biến kiểm soát vòng lặp nhập liệu
@@ -33,12 +31,6 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
 
     // Mở font chữ lớn với kích thước 100
     TTF_Font *largeFont = TTF_OpenFont("data/digital.ttf", 100);
-    if (!largeFont)
-    {
-        // Hiển thị lỗi nếu không thể tải font
-        cerr << "Không thể tải font! TTF Error: " << TTF_GetError() << endl;
-        return 0;
-    }
 
     // Vòng lặp nhập liệu
     while (!done)
@@ -68,14 +60,12 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
                         inputText = inputText.substr(1) + to_string(i);
                     }
                 }
-
                 // Kiểm tra nút Start
                 if (checkClickButton(x, y, startButton))
                 {
                     // Kết thúc nhập liệu
                     done = true;
                 }
-
                 // Kiểm tra nút Clear
                 if (checkClickButton(x, y, clearButton))
                 {

@@ -9,8 +9,8 @@
 using namespace std;
 
 // Kích thước của sổ
-const int WINDOW_WIDTH = 500;  // Chiều rộng cửa sổ
-const int WINDOW_HEIGHT = 350; // Chiều cao cửa sổ
+const int WINDOW_WIDTH = 600;  // Chiều rộng cửa sổ
+const int WINDOW_HEIGHT = 400; // Chiều cao cửa sổ
 
 // Màu sắc
 const SDL_Color BACKGROUND_COLOR = {0, 0, 0, 255};   // Màu nền: đen

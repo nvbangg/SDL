@@ -1,7 +1,4 @@
-
 Lưu cấu hình: Lưu thời gian đếm ngược và các thiết lập khác vào một file cấu hình để người dùng có thể tiếp tục từ lần sử dụng trước.
 Tải cấu hình: Tải cấu hình từ file khi khởi động chương trình.
-
-thêm số mili giây vào thời gian đếm ngược
-Thay đổi giao diện (UI)
-Thay đổi màu sắc giao diện theo thời gian: màu xanh khi thời gian còn nhiều màu đỏ khi thời gian còn ít (ví dụ 10 giây cuối).
+sau khi reset lúc time out thì vẫn giữ thời gian trước
+đổi cửa sổ được

@@ -1,11 +1,6 @@
-#include "make/countdown.h"
-#include "make/drawing.h"
-#include <iostream>
-using namespace std;
+#include "common.h"
 
-// Hàm formatTime định dạng thời gian từ giây thành chuỗi "HH:MM:SS"
-// seconds: Thời gian tính bằng giây
-// Trả về: Chuỗi định dạng "HH:MM:SS"
+// Hàm định dạng thời gian từ giây thành chuỗi "HH:MM:SS"
 string formatTime(int seconds)
 {
     int hours = seconds / 3600;
@@ -17,209 +12,223 @@ string formatTime(int seconds)
            (secs < 10 ? "0" : "") + to_string(secs);
 }
 
-// Hàm runCountdown thực hiện việc đếm ngược
-// renderer: Con trỏ tới SDL_Renderer để vẽ lên màn hình
-// font: Con trỏ tới TTF_Font để vẽ chữ lên màn hình
-// alarm: Con trỏ tới Mix_Chunk để phát âm thanh báo động khi đếm ngược kết thúc
-// countdownTime: Tham chiếu tới biến đếm ngược, giá trị này sẽ bị thay đổi trong quá trình đếm ngược
-// Trả về: Trạng thái của hàm, true nếu cần reset, false nếu không
+// Hàm thực hiện việc đếm ngược
 bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int &countdownTime)
 {
-    SDL_Color textColor = {0, 255, 0};       // Màu xanh lá cho đồng hồ
-    SDL_Color pausedTextColor = {255, 0, 0}; // Màu đỏ cho trạng thái tạm dừng
-    bool running = true;                     // Biến kiểm soát vòng lặp đếm ngược
-    bool paused = false;                     // Biến kiểm soát trạng thái tạm dừng
-    SDL_Event e;                             // Biến sự kiện SDL
-    Uint32 startTime = SDL_GetTicks();       // Lấy thời gian bắt đầu
-    Uint32 pauseStartTime = 0;               // Thời gian bắt đầu tạm dừng
-    int lastRemainingTime = -1;              // Thời gian còn lại lần cuối
-    int elapsedPausedTime = 0;               // Tổng thời gian đã tạm dừng
+    // Biến kiểm soát vòng lặp đếm ngược
+    bool running = true;
+    // Biến kiểm soát trạng thái tạm dừng
+    bool paused = false;
+    // Biến sự kiện SDL
+    SDL_Event e;
+    // Lấy thời gian bắt đầu
+    Uint32 startTime = SDL_GetTicks();
+    // Thời gian bắt đầu tạm dừng
+    Uint32 pauseStartTime = 0;
+    // Thời gian còn lại lần cuối
+    int lastRemainingTime = -1;
+    // Tổng thời gian đã tạm dừng
+    int elapsedPausedTime = 0;
 
     // Nút Pause và Reset nằm ở dưới cùng của màn hình
-    SDL_Rect pauseButton = {600 / 2 - 100, 400 - 60, 80, 40};
-    SDL_Rect resetButton = {600 / 2 + 20, 400 - 60, 80, 40};
+    SDL_Rect pauseButton = {WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 + 50, 80, 40};
+    SDL_Rect resetButton = {WINDOW_WIDTH / 2 + 20, WINDOW_HEIGHT / 2 + 50, 80, 40};
 
-    TTF_Font *largeFont = TTF_OpenFont("data/digital.ttf", 100); // Mở font chữ lớn với kích thước 100
+    // Mở font chữ lớn với kích thước 100
+    TTF_Font *largeFont = TTF_OpenFont("data/digital.ttf", 100);
     if (!largeFont)
     {
-        cerr << "Không thể tải font! TTF Error: " << TTF_GetError() << endl; // Hiển thị lỗi nếu không thể tải font
+        cerr << "Không thể tải font! TTF Error: " << TTF_GetError() << endl;
         return false;
     }
 
-    if (countdownTime == 0) // Kiểm tra nếu thời gian đếm ngược là 0
+    // Kiểm tra nếu thời gian đếm ngược là 0
+    if (countdownTime == 0)
     {
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Đặt màu vẽ là màu đen
-        SDL_RenderClear(renderer);                      // Xóa renderer với màu đã thiết lập
+        // Thiết lập màu nền cho renderer
+        clearRenderer(renderer, BACKGROUND_COLOR);
 
-        string timeText = "TIME OUT";  // Chuỗi ký tự hiển thị khi hết thời gian
-        Mix_PlayChannel(-1, alarm, 0); // Phát âm thanh báo động
+        // Chuỗi ký tự hiển thị khi hết thời gian
+        string timeText = "TIME OUT";
+        // Phát âm thanh báo động
+        Mix_PlayChannel(-1, alarm, 0);
 
-        SDL_Surface *textSurface = TTF_RenderText_Solid(largeFont, timeText.c_str(), textColor); // Tạo surface chứa chữ
-        SDL_Texture *timeTexture = SDL_CreateTextureFromSurface(renderer, textSurface);          // Tạo texture từ surface
-        SDL_FreeSurface(textSurface); // Giải phóng surface
+        // Vẽ thời gian lên màn hình
+        drawText(renderer, largeFont, timeText.c_str(), TIME_COLOR, 0, -80);
 
-        int textWidth, textHeight;
-        SDL_QueryTexture(timeTexture, NULL, NULL, &textWidth, &textHeight); // Lấy kích thước của texture
-        SDL_Rect renderQuad = {(600 - textWidth) / 2, (400 - textHeight) / 2, textWidth, textHeight}; // Đặt vị trí và kích thước của chữ
+        // Đặt lại vị trí nút Reset
+        resetButton.x = (WINDOW_WIDTH - resetButton.w) / 2;
+        // Vẽ nút Reset
+        drawButton(renderer, "Reset", resetButton);
 
-        SDL_RenderCopy(renderer, timeTexture, NULL, &renderQuad); // Vẽ chữ lên màn hình
-        SDL_DestroyTexture(timeTexture);                          // Giải phóng texture
+        // Hiển thị renderer lên cửa sổ
+        SDL_RenderPresent(renderer);
 
-        resetButton.x = (600 - resetButton.w) / 2;  // Đặt lại vị trí nút Reset
-        drawButton(renderer, "Reset", resetButton); // Vẽ nút Reset
-
-        SDL_RenderPresent(renderer); // Hiển thị renderer lên cửa sổ
-
-        bool reset = false; // Biến kiểm soát vòng lặp reset
+        // Biến kiểm soát vòng lặp reset
+        bool reset = false;
         while (!reset)
         {
-            while (SDL_PollEvent(&e) != 0) // Xử lý sự kiện
+            // Xử lý sự kiện
+            while (SDL_PollEvent(&e) != 0)
             {
-                if (e.type == SDL_QUIT) // Kiểm tra sự kiện thoát
+                // Kiểm tra sự kiện thoát
+                if (e.type == SDL_QUIT)
                 {
                     running = false;
                     reset = true;
                 }
-                else if (e.type == SDL_MOUSEBUTTONDOWN) // Kiểm tra sự kiện nhấn chuột
+                // Kiểm tra sự kiện nhấn chuột
+                else if (e.type == SDL_MOUSEBUTTONDOWN)
                 {
                     int x, y;
-                    SDL_GetMouseState(&x, &y); // Lấy vị trí chuột
+                    // Lấy vị trí chuột
+                    SDL_GetMouseState(&x, &y);
 
                     if (x >= resetButton.x && x <= resetButton.x + resetButton.w &&
                         y >= resetButton.y && y <= resetButton.y + resetButton.h)
                     {
-                        TTF_CloseFont(largeFont); // Đóng font
-                        return true;              // Trả về true để reset
+                        // Đóng font
+                        TTF_CloseFont(largeFont);
+                        // Trả về true để reset
+                        return true;
                     }
                 }
             }
         }
     }
 
-    while (running) // Vòng lặp đếm ngược
+    // Vòng lặp đếm ngược
+    while (running)
     {
-        while (SDL_PollEvent(&e) != 0) // Xử lý sự kiện
+        // Xử lý sự kiện
+        while (SDL_PollEvent(&e) != 0)
         {
-            if (e.type == SDL_QUIT) // Kiểm tra sự kiện thoát
+            // Kiểm tra sự kiện thoát
+            if (e.type == SDL_QUIT)
             {
                 running = false;
             }
-            else if (e.type == SDL_MOUSEBUTTONDOWN) // Kiểm tra sự kiện nhấn chuột
+            // Kiểm tra sự kiện nhấn chuột
+            else if (e.type == SDL_MOUSEBUTTONDOWN)
             {
                 int x, y;
-                SDL_GetMouseState(&x, &y); // Lấy vị trí chuột
+                // Lấy vị trí chuột
+                SDL_GetMouseState(&x, &y);
 
                 if (x >= pauseButton.x && x <= pauseButton.x + pauseButton.w &&
                     y >= pauseButton.y && y <= pauseButton.y + pauseButton.h && lastRemainingTime > 0)
                 {
-                    paused = !paused; // Đổi trạng thái tạm dừng
+                    // Đổi trạng thái tạm dừng
+                    paused = !paused;
                     if (paused)
                     {
-                        pauseStartTime = SDL_GetTicks(); // Lấy thời gian bắt đầu tạm dừng
+                        // Lấy thời gian bắt đầu tạm dừng
+                        pauseStartTime = SDL_GetTicks();
                     }
                     else
                     {
-                        elapsedPausedTime += SDL_GetTicks() - pauseStartTime; // Cập nhật tổng thời gian đã tạm dừng
+                        // Cập nhật tổng thời gian đã tạm dừng
+                        elapsedPausedTime += SDL_GetTicks() - pauseStartTime;
                     }
                 }
 
                 if (x >= resetButton.x && x <= resetButton.x + resetButton.w &&
                     y >= resetButton.y && y <= resetButton.y + resetButton.h)
                 {
-                    TTF_CloseFont(largeFont); // Đóng font
-                    return true;              // Trả về true để reset
+                    // Đóng font
+                    TTF_CloseFont(largeFont);
+                    // Trả về true để reset
+                    return true;
                 }
             }
         }
 
-        if (!paused) // Nếu không tạm dừng
+        // Nếu không tạm dừng
+        if (!paused)
         {
-            Uint32 currentTime = SDL_GetTicks();                                       // Lấy thời gian hiện tại
-            int elapsedSeconds = (currentTime - startTime - elapsedPausedTime) / 1000; // Tính thời gian đã trôi qua
-            int remainingTime = countdownTime - elapsedSeconds;                        // Tính thời gian còn lại
+            // Lấy thời gian hiện tại
+            Uint32 currentTime = SDL_GetTicks();
+            // Tính thời gian đã trôi qua
+            int elapsedSeconds = (currentTime - startTime - elapsedPausedTime) / 1000;
+            // Tính thời gian còn lại
+            int remainingTime = countdownTime - elapsedSeconds;
 
+            // Đảm bảo thời gian còn lại không âm
             if (remainingTime < 0)
             {
-                remainingTime = 0; // Đảm bảo thời gian còn lại không âm
+                remainingTime = 0;
             }
 
-            if (remainingTime != lastRemainingTime) // Nếu thời gian còn lại thay đổi
+            // Nếu thời gian còn lại thay đổi
+            if (remainingTime != lastRemainingTime)
             {
-                lastRemainingTime = remainingTime; // Cập nhật thời gian còn lại lần cuối
+                // Cập nhật thời gian còn lại lần cuối
+                lastRemainingTime = remainingTime;
 
-                string timeText = (remainingTime > 0) ? formatTime(remainingTime) : "TIME OUT"; // Định dạng thời gian
+                // Định dạng thời gian
+                string timeText = (remainingTime > 0) ? formatTime(remainingTime) : "TIME OUT";
 
                 if (remainingTime == 0)
                 {
-                    Mix_PlayChannel(-1, alarm, 0); // Phát âm thanh báo động khi hết thời gian
+                    // Phát âm thanh báo động khi hết thời gian
+                    Mix_PlayChannel(-1, alarm, 0);
                 }
 
-                SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Đặt màu vẽ là màu đen
-                SDL_RenderClear(renderer);                      // Xóa renderer với màu đã thiết lập
+                // Thiết lập màu nền cho renderer
+                clearRenderer(renderer, BACKGROUND_COLOR);
 
-                drawProgressBar(renderer, countdownTime, remainingTime); // Vẽ thanh tiến trình
+                // Vẽ thanh tiến trình
+                drawProgressBar(renderer, countdownTime, remainingTime);
 
-                SDL_Surface *textSurface = TTF_RenderText_Solid(largeFont, timeText.c_str(), textColor); // Tạo surface chứa chữ
-                SDL_Texture *timeTexture = SDL_CreateTextureFromSurface(renderer, textSurface);          // Tạo texture từ surface
-                SDL_FreeSurface(textSurface);                                                            // Giải phóng surface
-
-                int textWidth, textHeight;
-                SDL_QueryTexture(timeTexture, NULL, NULL, &textWidth, &textHeight);                           // Lấy kích thước của texture
-                SDL_Rect renderQuad = {(600 - textWidth) / 2, (400 - textHeight) / 2, textWidth, textHeight}; // Đặt vị trí và kích thước của chữ
-
-                SDL_RenderCopy(renderer, timeTexture, NULL, &renderQuad); // Vẽ chữ lên màn hình
-                SDL_DestroyTexture(timeTexture);                          // Giải phóng texture
+                // Vẽ thời gian lên màn hình
+                drawText(renderer, largeFont, timeText.c_str(), TIME_COLOR, 0, -80);
 
                 if (remainingTime > 0)
                 {
-                    drawButton(renderer, paused ? "Resume" : "Pause", pauseButton); // Vẽ nút Pause hoặc Resume
-                    drawButton(renderer, "Reset", resetButton);                     // Vẽ nút Reset
+                    // Vẽ nút Pause hoặc Resume
+                    drawButton(renderer, paused ? "Resume" : "Pause", pauseButton);
+                    // Vẽ nút Reset
+                    drawButton(renderer, "Reset", resetButton);
                 }
                 else
                 {
-                    resetButton.x = (600 - resetButton.w) / 2;  // Đặt lại vị trí nút Reset
-                    drawButton(renderer, "Reset", resetButton); // Vẽ nút Reset
+                    // Đặt lại vị trí nút Reset
+                    resetButton.x = (WINDOW_WIDTH - resetButton.w) / 2;
+                    // Vẽ nút Reset
+                    drawButton(renderer, "Reset", resetButton);
                 }
 
-                SDL_RenderPresent(renderer); // Hiển thị renderer lên cửa sổ
+                // Hiển thị renderer lên cửa sổ
+                SDL_RenderPresent(renderer);
             }
         }
         else // Nếu tạm dừng
         {
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255); // Đặt màu vẽ là màu đen
-            SDL_RenderClear(renderer);                      // Xóa renderer với màu đã thiết lập
+            // Thiết lập màu nền cho renderer
+            clearRenderer(renderer, BACKGROUND_COLOR);
 
-            SDL_Surface *pausedSurface = TTF_RenderText_Solid(font, "Paused", pausedTextColor); // Tạo surface chứa chữ "Paused"
-            SDL_Texture *pausedTexture = SDL_CreateTextureFromSurface(renderer, pausedSurface); // Tạo texture từ surface
-            SDL_FreeSurface(pausedSurface);                                                     // Giải phóng surface
+            drawText(renderer, font, "Paused", PAUSE_TEXT_COLOR, 0, -150);
 
-            int pausedTextWidth, pausedTextHeight;
-            SDL_QueryTexture(pausedTexture, NULL, NULL, &pausedTextWidth, &pausedTextHeight);                                     // Lấy kích thước của texture
-            SDL_Rect pausedRect = {(600 - pausedTextWidth) / 2, (400 - pausedTextHeight) / 4, pausedTextWidth, pausedTextHeight}; // Đặt vị trí và kích thước của chữ "Paused"
-            SDL_RenderCopy(renderer, pausedTexture, NULL, &pausedRect);                                                           // Vẽ chữ "Paused" lên màn hình
-            SDL_DestroyTexture(pausedTexture);                                                                                    // Giải phóng texture
+            // Định dạng thời gian còn lại
+            string timeText = formatTime(lastRemainingTime);
+            // Vẽ thời gian lên màn hình
+            drawText(renderer, largeFont, timeText.c_str(), TIME_COLOR, 0, -80);
 
-            string timeText = formatTime(lastRemainingTime);                                         // Định dạng thời gian còn lại
-            SDL_Surface *textSurface = TTF_RenderText_Solid(largeFont, timeText.c_str(), textColor); // Tạo surface chứa chữ
-            SDL_Texture *timeTexture = SDL_CreateTextureFromSurface(renderer, textSurface);          // Tạo texture từ surface
-            SDL_FreeSurface(textSurface);                                                            // Giải phóng surface
+            // Vẽ nút Resume
+            drawButton(renderer, "Resume", pauseButton);
+            // Vẽ nút Reset
+            drawButton(renderer, "Reset", resetButton);
 
-            int textWidth, textHeight;
-            SDL_QueryTexture(timeTexture, NULL, NULL, &textWidth, &textHeight);                           // Lấy kích thước của texture
-            SDL_Rect renderQuad = {(600 - textWidth) / 2, (400 - textHeight) / 2, textWidth, textHeight}; // Đặt vị trí và kích thước của chữ
-
-            SDL_RenderCopy(renderer, timeTexture, NULL, &renderQuad); // Vẽ chữ lên màn hình
-            SDL_DestroyTexture(timeTexture);                          // Giải phóng texture
-
-            drawButton(renderer, "Resume", pauseButton); // Vẽ nút Resume
-            drawButton(renderer, "Reset", resetButton);  // Vẽ nút Reset
-
-            SDL_RenderPresent(renderer); // Hiển thị renderer lên cửa sổ
+            // Hiển thị renderer lên cửa sổ
+            SDL_RenderPresent(renderer);
         }
 
-        SDL_Delay(1000 / 60); // Giảm tải CPU bằng cách chờ 1/60 giây
+        // Giảm tải CPU bằng cách chờ 1/60 giây
+        SDL_Delay(1000 / 60);
     }
 
-    TTF_CloseFont(largeFont); // Đóng font
-    return false;             // Trả về false nếu không cần reset
+    // Đóng font
+    TTF_CloseFont(largeFont);
+    // Trả về false nếu không cần reset
+    return false;
 }

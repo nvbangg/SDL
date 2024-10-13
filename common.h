@@ -28,6 +28,8 @@ void closeSDL(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, Mix_Ch
 
 // Thiết lập màu nền cho renderer
 void clearRenderer(SDL_Renderer *renderer, SDL_Color color);
+// Check click button
+bool checkClickButton(int x, int y, const SDL_Rect &button);
 // Vẽ chữ lên màn hình
 void drawText(SDL_Renderer *renderer, TTF_Font *font, const char *text, SDL_Color color, int xOffset, int yOffset);
 // Vẽ nút

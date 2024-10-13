@@ -7,6 +7,13 @@ void clearRenderer(SDL_Renderer *renderer, SDL_Color color)
     SDL_RenderClear(renderer);
 }
 
+//Check click button
+bool checkClickButton(int x, int y, const SDL_Rect &button)
+{
+    return (x >= button.x && x <= button.x + button.w &&
+            y >= button.y && y <= button.y + button.h);
+}
+
 // Vẽ chữ lên màn hình
 void drawText(SDL_Renderer *renderer, TTF_Font *font, const char *text, SDL_Color color, int xOffset, int yOffset)
 {

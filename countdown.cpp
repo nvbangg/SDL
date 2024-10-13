@@ -84,8 +84,8 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
                     // Lấy vị trí chuột
                     SDL_GetMouseState(&x, &y);
 
-                    if (x >= resetButton.x && x <= resetButton.x + resetButton.w &&
-                        y >= resetButton.y && y <= resetButton.y + resetButton.h)
+                    // Sử dụng hàm kiểm tra nhấn nút
+                    if (checkClickButton(x, y, resetButton))
                     {
                         // Đóng font
                         TTF_CloseFont(largeFont);
@@ -115,8 +115,8 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
                 // Lấy vị trí chuột
                 SDL_GetMouseState(&x, &y);
 
-                if (x >= pauseButton.x && x <= pauseButton.x + pauseButton.w &&
-                    y >= pauseButton.y && y <= pauseButton.y + pauseButton.h && lastRemainingTime > 0)
+                // Sử dụng hàm kiểm tra nhấn nút
+                if (checkClickButton(x, y, pauseButton) && lastRemainingTime > 0)
                 {
                     // Đổi trạng thái tạm dừng
                     paused = !paused;
@@ -132,8 +132,7 @@ bool runCountdown(SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int 
                     }
                 }
 
-                if (x >= resetButton.x && x <= resetButton.x + resetButton.w &&
-                    y >= resetButton.y && y <= resetButton.y + resetButton.h)
+                if (checkClickButton(x, y, resetButton))
                 {
                     // Đóng font
                     TTF_CloseFont(largeFont);

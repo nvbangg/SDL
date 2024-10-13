@@ -62,8 +62,7 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
                 // Kiểm tra nhấn nút số
                 for (int i = 0; i < 10; ++i)
                 {
-                    if (x >= digitButtons[i].x && x <= digitButtons[i].x + digitButtons[i].w &&
-                        y >= digitButtons[i].y && y <= digitButtons[i].y + digitButtons[i].h)
+                    if (checkClickButton(x, y, digitButtons[i]))
                     {
                         // Cập nhật chuỗi thời gian
                         inputText = inputText.substr(1) + to_string(i);
@@ -71,16 +70,14 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
                 }
 
                 // Kiểm tra nút Start
-                if (x >= startButton.x && x <= startButton.x + startButton.w &&
-                    y >= startButton.y && y <= startButton.y + startButton.h)
+                if (checkClickButton(x, y, startButton))
                 {
                     // Kết thúc nhập liệu
                     done = true;
                 }
 
                 // Kiểm tra nút Clear
-                if (x >= clearButton.x && x <= clearButton.x + clearButton.w &&
-                    y >= clearButton.y && y <= clearButton.y + clearButton.h)
+                if (checkClickButton(x, y, clearButton))
                 {
                     // Đặt lại chuỗi thời gian
                     inputText = "000000";

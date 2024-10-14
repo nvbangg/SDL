@@ -1,37 +1,43 @@
 #include "common.h"
+
 // Hàm nhập thời gian
-int inputTime(SDL_Renderer *renderer, TTF_Font *font)
+int inputTime(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, int defaultTime = 0)
 {
     // Thiết lập màu nền cho renderer
     clearRenderer(renderer, BACKGROUND_COLOR);
     // Hiển thị renderer lên cửa sổ
     SDL_RenderPresent(renderer);
 
-    // Chuỗi ký tự ban đầu cho thời gian
-    string inputText = "000000";
+    // Chuyển đổi defaultTime thành chuỗi định dạng HHMMSS
+    int defaultHours = defaultTime / 3600;
+    int defaultMinutes = (defaultTime % 3600) / 60;
+    int defaultSeconds = defaultTime % 60;
+    string inputText = (defaultHours < 10 ? "0" : "") + to_string(defaultHours) +
+                       (defaultMinutes < 10 ? "0" : "") + to_string(defaultMinutes) +
+                       (defaultSeconds < 10 ? "0" : "") + to_string(defaultSeconds);
+
     // Biến kiểm soát vòng lặp nhập liệu
     bool done = false;
     // Biến sự kiện SDL
     SDL_Event e;
 
-    // Nút Start và Clear nằm ngay dưới đồng hồ
-    SDL_Rect startButton = {WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 10, 80, 40};
-    SDL_Rect clearButton = {WINDOW_WIDTH / 2 + 20, WINDOW_HEIGHT / 2 - 10, 80, 40};
-
-    // Nút số từ 0 đến 4 ở hàng trên, từ 5 đến 9 ở hàng dưới
-    vector<SDL_Rect> digitButtons(10);
-    for (int i = 0; i < 5; ++i) // Hàng trên: 0-4
-    {
-        digitButtons[i] = {WINDOW_WIDTH / 2 - 240 + i * 100, WINDOW_HEIGHT / 2 + 50, 80, 40};
-    }
-    for (int i = 5; i < 10; ++i) // Hàng dưới: 5-9
-    {
-        digitButtons[i] = {WINDOW_WIDTH / 2 - 240 + (i - 5) * 100, WINDOW_HEIGHT / 2 + 110, 80, 40};
-    }
-
     // Vòng lặp nhập liệu
     while (!done)
     {
+        // Nút Start và Clear nằm ngay dưới đồng hồ
+        SDL_Rect startButton = {WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 10, 80, 40};
+        SDL_Rect clearButton = {WINDOW_WIDTH / 2 + 20, WINDOW_HEIGHT / 2 - 10, 80, 40};
+
+        // Nút số từ 0 đến 4 ở hàng trên, từ 5 đến 9 ở hàng dưới
+        vector<SDL_Rect> digitButtons(10);
+        for (int i = 0; i < 5; ++i) // Hàng trên: 0-4
+        {
+            digitButtons[i] = {WINDOW_WIDTH / 2 - 240 + i * 100, WINDOW_HEIGHT / 2 + 50, 80, 40};
+        }
+        for (int i = 5; i < 10; ++i) // Hàng dưới: 5-9
+        {
+            digitButtons[i] = {WINDOW_WIDTH / 2 - 240 + (i - 5) * 100, WINDOW_HEIGHT / 2 + 110, 80, 40};
+        }
         // Xử lý sự kiện
         while (SDL_PollEvent(&e) != 0)
         {
@@ -40,6 +46,11 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
             {
                 done = true;
                 exit(0);
+            }
+            // Kiểm tra sự kiện cửa sổ
+            else if (e.type == SDL_WINDOWEVENT)
+            {
+                handleWindowEvent(e, window);
             }
             // Kiểm tra sự kiện nhấn chuột
             else if (e.type == SDL_MOUSEBUTTONDOWN)
@@ -98,7 +109,10 @@ int inputTime(SDL_Renderer *renderer, TTF_Font *font)
     int hours = stoi(inputText.substr(0, 2));
     int minutes = stoi(inputText.substr(2, 2));
     int seconds = stoi(inputText.substr(4, 2));
+    int countdownTime = hours * 3600 + minutes * 60 + seconds;
 
-    // Trả về thời gian dưới dạng số giây
-    return hours * 3600 + minutes * 60 + seconds;
+    // Lưu thời gian vào file
+    saveTimeToFile(countdownTime);
+
+    return countdownTime;
 }

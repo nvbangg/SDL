@@ -62,6 +62,7 @@ void drawButton(SDL_Renderer *renderer, const string &label, SDL_Rect &buttonRec
     int textWidth, textHeight;
     // Lấy kích thước của texture
     SDL_QueryTexture(textTexture, NULL, NULL, &textWidth, &textHeight);
+    
     // Đặt vị trí và kích thước của chữ
     SDL_Rect textRect = {buttonRect.x + (buttonRect.w - textWidth) / 2, buttonRect.y + (buttonRect.h - textHeight) / 2, textWidth, textHeight};
 

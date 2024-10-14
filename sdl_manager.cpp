@@ -28,6 +28,29 @@ void handleError(const string &message, SDL_Window *window, SDL_Renderer *render
     exit(-1);
 }
 
+// Hàm xử lý sự kiện cửa sổ
+void handleWindowEvent(SDL_Event &e, SDL_Window *window)
+{
+    if (e.window.event == SDL_WINDOWEVENT_RESIZED)
+    {
+        int newWidth = e.window.data1;
+        int newHeight = e.window.data2;
+
+        if (newWidth < 500)
+        {
+            newWidth = 500;
+        }
+        if (newHeight < 400)
+        {
+            newHeight = 400;
+        }
+
+        SDL_SetWindowSize(window, newWidth, newHeight);
+        WINDOW_WIDTH = newWidth;
+        WINDOW_HEIGHT = newHeight;
+    }
+}
+
 // Hàm initSDL khởi tạo các thành phần của SDL
 void initSDL(SDL_Window *&window, SDL_Renderer *&renderer, TTF_Font *&font, Mix_Chunk *&alarm)
 {
@@ -35,7 +58,7 @@ void initSDL(SDL_Window *&window, SDL_Renderer *&renderer, TTF_Font *&font, Mix_
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
         handleError("SDL could not initialize!", window, renderer, font, alarm);
     // Tạo cửa sổ và kiểm tra lỗi
-    window = SDL_CreateWindow("Countdown Timer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+    window = SDL_CreateWindow("Countdown Timer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (!window)
         handleError("Window could not be created!", window, renderer, font, alarm);
     // Tạo renderer SDL với cửa sổ đã tạo, sử dụng driver mặc định (-1), và sử dụng tăng tốc phần cứng
@@ -59,6 +82,37 @@ void initSDL(SDL_Window *&window, SDL_Renderer *&renderer, TTF_Font *&font, Mix_
 
     // Bắt đầu nhận đầu vào văn bản từ người dùng
     SDL_StartTextInput();
+}
+
+void saveTimeToFile(int countdownTime)
+{
+    std::ofstream outFile("config.txt");
+    if (outFile.is_open())
+    {
+        outFile << countdownTime;
+        outFile.close();
+    }
+}
+
+int loadTimeFromFile()
+{
+    std::ifstream inFile("config.txt");
+    int countdownTime = 0;
+    if (inFile.is_open())
+    {
+        inFile >> countdownTime;
+        inFile.close();
+    }
+    return countdownTime;
+}
+void resetTimeInFile()
+{
+    std::ofstream outFile("config.txt");
+    if (outFile.is_open())
+    {
+        outFile << 0;
+        outFile.close();
+    }
 }
 
 // Hàm closeSDL giải phóng các tài nguyên của SDL

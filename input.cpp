@@ -71,8 +71,11 @@ int inputTime(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, int de
                 // Kiểm tra nút Start
                 if (checkClickButton(x, y, startButton))
                 {
-                    // Kết thúc nhập liệu
-                    done = true;
+                    // Chỉ cho phép kết thúc nhập liệu nếu inputText khác "000000"
+                    if (inputText != "000000")
+                    {
+                        done = true;
+                    }
                 }
                 // Kiểm tra nút Clear
                 if (checkClickButton(x, y, clearButton))

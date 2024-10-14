@@ -15,7 +15,7 @@ string formatTime(int seconds)
 // Hàm thực hiện việc đếm ngược
 bool runCountdown(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int &countdownTime)
 {
-    bool running = true, paused = false;
+    bool running = true, paused = false, alarmPlayed = false;
     SDL_Event e;
     Uint32 startTime = SDL_GetTicks(), pauseStartTime = 0, elapsedPausedTime = 0;
     int lastRemainingTime = -1;
@@ -49,12 +49,13 @@ bool runCountdown(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, Mi
                         else
                             elapsedPausedTime += SDL_GetTicks() - pauseStartTime;
                     }
-                    else
+                    else if (countdownTime > 0) // Kiểm tra nếu countdownTime > 0
                     {
                         // Khi nhấn nút "Repeat", khởi động lại countdown
                         startTime = SDL_GetTicks();
                         elapsedPausedTime = 0;
                         paused = false;
+                        alarmPlayed = false;
                     }
                 }
 
@@ -71,15 +72,15 @@ bool runCountdown(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, Mi
             if (remainingTime < 0)
                 remainingTime = 0;
 
-            // Chỉ vẽ lại nếu thời gian còn lại thay đổi
-            // if (remainingTime != lastRemainingTime)
-            // {
             lastRemainingTime = remainingTime;
             clearRenderer(renderer, BACKGROUND_COLOR);
 
             // Vẽ thời gian còn lại hoặc hiển thị "TIME OUT"
             string timeText = (remainingTime > 0) ? formatTime(remainingTime) : "TIME OUT";
             drawText(renderer, font, timeText.c_str(), TIME_COLOR, 0, -80);
+
+            // Vẽ thanh tiến trình
+            drawProgressBar(renderer, countdownTime, remainingTime);
 
             // Vẽ các nút
             if (remainingTime > 0)
@@ -90,12 +91,15 @@ bool runCountdown(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, Mi
             {
                 // Khi hết thời gian, đổi nút "Pause" thành "Repeat"
                 drawButton(renderer, "Repeat", pauseButton);
-                Mix_PlayChannel(-1, alarm, 0); // Phát âm thanh báo động khi hết thời gian
+                if (!alarmPlayed)
+                {
+                    Mix_PlayChannel(-1, alarm, 0); // Phát âm thanh báo động khi hết thời gian
+                    alarmPlayed = true;            // Đánh dấu đã phát âm thanh
+                }
             }
             drawButton(renderer, "Reset", resetButton);
 
             SDL_RenderPresent(renderer);
-            //}
         }
         else // Nếu đang tạm dừng, hiển thị trạng thái Paused
         {

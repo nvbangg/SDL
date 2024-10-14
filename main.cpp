@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
         // Nếu cần reset, đặt lại thời gian trong file về 0
         if (reset)
         {
-            resetTimeInFile();
+            saveTimeToFile(0);
         }
     } while (reset); // Lặp lại nếu cần reset
 

@@ -5,24 +5,20 @@ int WINDOW_HEIGHT = 400; // Chiều cao cửa sổ SDL
 
 SDL_Window *window = NULL;     // Con trỏ tới cửa sổ SDL
 SDL_Renderer *renderer = NULL; // Con trỏ tới renderer SDL
-TTF_Font *font = NULL;         // Con trỏ tới font chữ SDL
-Mix_Chunk *alarm = NULL;       // Con trỏ tới âm thanh báo động SDL
 
 int main(int argc, char *argv[])
 {
-    initSDL(window, renderer, font, alarm);
+    // Khởi tạo các thành phần SDL
+    initSDL(window, renderer);
 
     bool reset = false; // Biến để kiểm tra xem có cần reset đếm ngược không
     do
     {
-        // Tải thời gian từ file
-        int countdownTime = loadTimeFromFile();
-
-        // Hiển thị cửa sổ input với thời gian mặc định từ file
-        countdownTime = inputTime(window, renderer, font, countdownTime);
+        // Nhập thời gian và lấy thời gian nhập vào
+        int countdownTime = inputTime(window, renderer);
 
         // Chạy đếm ngược và kiểm tra xem có cần reset không
-        reset = runCountdown(window, renderer, font, alarm, countdownTime);
+        reset = runCountdown(window, renderer, countdownTime);
 
         // Nếu cần reset, đặt lại thời gian trong file về 0
         if (reset)
@@ -32,7 +28,7 @@ int main(int argc, char *argv[])
     } while (reset); // Lặp lại nếu cần reset
 
     // Đóng SDL và giải phóng tài nguyên
-    closeSDL(window, renderer, font, alarm);
+    closeSDL(window, renderer);
 
     return 0; // Kết thúc chương trình
 }

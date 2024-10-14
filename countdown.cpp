@@ -3,13 +3,10 @@
 // Hàm định dạng thời gian từ giây thành chuỗi "HH:MM:SS"
 string formatTime(int seconds)
 {
-    // Tính số giờ
+    // Tính số giờ, phút giây
     int hours = seconds / 3600;
-    // Lấy phần dư của giây sau khi chia cho 3600
     seconds %= 3600;
-    // Tính số phút
     int minutes = seconds / 60;
-    // Lấy phần dư của giây sau khi chia cho 60
     int secs = seconds % 60;
     // Trả về chuỗi định dạng "HH:MM:SS"
     return (hours < 10 ? "0" : "") + to_string(hours) + ":" +
@@ -18,16 +15,22 @@ string formatTime(int seconds)
 }
 
 // Hàm thực hiện việc đếm ngược
-bool runCountdown(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int &countdownTime)
+bool runCountdown(SDL_Window *window, SDL_Renderer *renderer, int &countdownTime)
 {
+    // Mở font chữ với kích thước 50
+    TTF_Font *font = TTF_OpenFont("data/digital.ttf", 100);
+    // Mở font chữ với kích thước 50
+    TTF_Font *textFont = TTF_OpenFont("data/digital.ttf", 50);
+    // Mở âm thanh 
+    Mix_Chunk *alarm = Mix_LoadWAV("data/alarm.mp3");
+
     // Biến điều khiển vòng lặp
     bool running = true, paused = false, alarmPlayed = false;
     SDL_Event e;
     // Lấy thời gian bắt đầu
     Uint32 startTime = SDL_GetTicks(), pauseStartTime = 0, elapsedPausedTime = 0;
     int lastRemainingTime = -1;
-    // Mở font chữ với kích thước 50
-    TTF_Font *textFont = TTF_OpenFont("data/digital.ttf", 50);
+
     while (running)
     {
         // Định nghĩa vị trí và kích thước của nút "Pause"
@@ -129,8 +132,11 @@ bool runCountdown(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, Mi
         // Giảm tải CPU
         SDL_Delay(1000 / 60);
     }
-    // Đóng font chữ
+    // Đóng font chữ và giải phóng âm thanh
+    TTF_CloseFont(font);
     TTF_CloseFont(textFont);
+    Mix_FreeChunk(alarm);
+    
     // Kết thúc hàm
     return false;
 }

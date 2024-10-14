@@ -20,12 +20,12 @@ extern int WINDOW_WIDTH; // Kích thước chiều rộng cửa sổ
 extern int WINDOW_HEIGHT; // Kích thước chiều cao cửa sổ
 
 //! Trong functions.cpp
+// Hàm khởi tạo các thành phần của SDL
+void initSDL(SDL_Window *&window, SDL_Renderer *&renderer);
 // Hàm xử lý sự kiện cửa sổ
 void handleWindowEvent(SDL_Event &e, SDL_Window *window);
-// Hàm khởi tạo SDL
-void initSDL(SDL_Window *&window, SDL_Renderer *&renderer, TTF_Font *&font, Mix_Chunk *&alarm);
 // Hàm giải phóng tài nguyên của SDL
-void closeSDL(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm);
+void closeSDL(SDL_Window *window, SDL_Renderer *renderer);
 // Hàm lưu thời gian vào file
 void saveTimeToFile(int countdownTime);
 // Hàm tải thời gian từ file
@@ -45,6 +45,6 @@ void drawProgressBar(SDL_Renderer *renderer, int totalTime, int remainingTime);
 
 //! Trong file khác
 //Hàm nhập thời gian
-int inputTime(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, int defaultTime);
+int inputTime(SDL_Window *window, SDL_Renderer *renderer);
 //Hàm đếm ngược
-bool runCountdown(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, Mix_Chunk *alarm, int &countdownTime);
+bool runCountdown(SDL_Window *window, SDL_Renderer *renderer, int &countdownTime);

@@ -81,8 +81,17 @@ void handleMouseEvent(SDL_Event &e, string &inputText, bool &done, const vector<
 }
 
 // Hàm nhập thời gian
-int inputTime(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, int defaultTime = 0)
+int inputTime(SDL_Window *window, SDL_Renderer *renderer)
 {
+    // Tài font chữ cỡ 100
+    TTF_Font *font = TTF_OpenFont("data/digital.ttf", 100);
+
+    // Tải thời gian mặc định từ file
+    int defaultTime = loadTimeFromFile();
+    if (defaultTime < 0)
+    {
+        defaultTime = 0;
+    }
     // Chuyển đổi defaultTime thành chuỗi định dạng HHMMSS
     string inputText = convertDefaultTimeToString(defaultTime);
 
@@ -139,6 +148,9 @@ int inputTime(SDL_Window *window, SDL_Renderer *renderer, TTF_Font *font, int de
 
     // Lưu thời gian vào file
     saveTimeToFile(countdownTime);
+
+    // Close the font
+    TTF_CloseFont(font);
 
     return countdownTime;
 }

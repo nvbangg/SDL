@@ -124,7 +124,7 @@ int inputTime(SDL_Window *window, SDL_Renderer *renderer)
             // Kiểm tra sự kiện thoát
             if (e.type == SDL_QUIT)
             {
-                done = true;
+                closeSDL(window, renderer);
                 exit(0);
             }
             // Kiểm tra sự kiện cửa sổ

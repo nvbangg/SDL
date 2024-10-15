@@ -7,7 +7,7 @@ void initSDL(SDL_Window *&window, SDL_Renderer *&renderer)
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
     {
         cerr << "SDL could not initialize! SDL Error: " << SDL_GetError() << endl;
-        SDL_Quit();
+        closeSDL(window, renderer);
         exit(-1);
     }
 
@@ -16,7 +16,7 @@ void initSDL(SDL_Window *&window, SDL_Renderer *&renderer)
     if (!window)
     {
         cerr << "Window could not be created! SDL Error: " << SDL_GetError() << endl;
-        SDL_Quit();
+        closeSDL(window, renderer);
         exit(-1);
     }
 
@@ -25,8 +25,7 @@ void initSDL(SDL_Window *&window, SDL_Renderer *&renderer)
     if (!renderer)
     {
         cerr << "Renderer could not be created! SDL Error: " << SDL_GetError() << endl;
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        closeSDL(window, renderer);
         exit(-1);
     }
 
@@ -34,9 +33,7 @@ void initSDL(SDL_Window *&window, SDL_Renderer *&renderer)
     if (TTF_Init() == -1)
     {
         cerr << "TTF could not initialize! SDL_ttf Error: " << TTF_GetError() << endl;
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        closeSDL(window, renderer);
         exit(-1);
     }
     // Mở font chữ và kiểm tra lỗi
@@ -44,9 +41,7 @@ void initSDL(SDL_Window *&window, SDL_Renderer *&renderer)
     if (font == nullptr)
     {
         cerr << "Failed to load font: " << TTF_GetError() << endl;
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        closeSDL(window, renderer);
         exit(-1);
     }
     TTF_CloseFont(font); // Đóng font chữ
@@ -55,10 +50,7 @@ void initSDL(SDL_Window *&window, SDL_Renderer *&renderer)
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
     {
         cerr << "SDL_mixer could not initialize! SDL_mixer Error: " << Mix_GetError() << endl;
-        TTF_Quit();
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        closeSDL(window, renderer);
         exit(-1);
     }
     // Mở âm thanh và kiểm tra lỗi
@@ -66,10 +58,7 @@ void initSDL(SDL_Window *&window, SDL_Renderer *&renderer)
     if (alarm == nullptr)
     {
         cerr << "Failed to load alarm sound: " << Mix_GetError() << endl;
-        TTF_Quit();
-        SDL_DestroyRenderer(renderer);
-        SDL_DestroyWindow(window);
-        SDL_Quit();
+        closeSDL(window, renderer);
         exit(-1);
     }
     Mix_FreeChunk(alarm); // Giải phóng âm thanh
@@ -112,15 +101,10 @@ void closeSDL(SDL_Window *window, SDL_Renderer *renderer)
     if (window)
         SDL_DestroyWindow(window);
 
-    // Đóng âm thanh
-    Mix_CloseAudio();
-
-    // Giải phóng toàn bộ SDL_mixer
+    // Kết thúc SDL_mixer
     Mix_Quit();
-
     // Kết thúc SDL_ttf
     TTF_Quit();
-
     // Kết thúc SDL
     SDL_Quit();
 }

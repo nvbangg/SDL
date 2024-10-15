@@ -17,19 +17,23 @@ string formatTime(int seconds)
 // Hàm thực hiện việc đếm ngược
 bool runCountdown(SDL_Window *window, SDL_Renderer *renderer, int &countdownTime)
 {
-    // Mở font chữ với kích thước 50
+    // Mở font chữ với kích thước 100
     TTF_Font *font = TTF_OpenFont("data/digital.ttf", 100);
     // Mở font chữ với kích thước 50
     TTF_Font *textFont = TTF_OpenFont("data/digital.ttf", 50);
-    // Mở âm thanh 
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+    // Mở âm thanh
     Mix_Chunk *alarm = Mix_LoadWAV("data/alarm.mp3");
 
     // Biến điều khiển vòng lặp
     bool running = true, paused = false, alarmPlayed = false;
     SDL_Event e;
+
     // Lấy thời gian bắt đầu
-    Uint32 startTime = SDL_GetTicks(), pauseStartTime = 0, elapsedPausedTime = 0;
-    int lastRemainingTime = -1;
+    Uint32 startTime = SDL_GetTicks(); // Thời gian bắt đầu của bộ đếm ngược
+    Uint32 pauseStartTime = 0;         // Thời gian bắt đầu của trạng thái tạm dừng
+    Uint32 elapsedPausedTime = 0;      // Tổng thời gian đã tạm dừng
+    int lastRemainingTime = -1;        // Thời gian còn lại cuối cùng của bộ đếm ngược
 
     while (running)
     {
@@ -41,10 +45,15 @@ bool runCountdown(SDL_Window *window, SDL_Renderer *renderer, int &countdownTime
         // Xử lý sự kiện
         while (SDL_PollEvent(&e) != 0)
         {
-            // Nếu sự kiện là thoát, kết thúc hàm
-            if (e.type == SDL_QUIT) return false;
+            // Kiểm tra sự kiện thoát
+            if (e.type == SDL_QUIT)
+            {
+                closeSDL(window, renderer);
+                exit(0);
+            }
             // Xử lý sự kiện cửa sổ
-            if (e.type == SDL_WINDOWEVENT) handleWindowEvent(e, window);
+            if (e.type == SDL_WINDOWEVENT)
+                handleWindowEvent(e, window);
             if (e.type == SDL_MOUSEBUTTONDOWN)
             {
                 int x, y;
@@ -57,21 +66,30 @@ bool runCountdown(SDL_Window *window, SDL_Renderer *renderer, int &countdownTime
                     {
                         // Đổi trạng thái tạm dừng
                         paused = !paused;
-                        if (paused) pauseStartTime = SDL_GetTicks(); // Lưu thời gian bắt đầu tạm dừng
-                        else elapsedPausedTime += SDL_GetTicks() - pauseStartTime; // Cộng thời gian tạm dừng
+                        if (paused)
+                            pauseStartTime = SDL_GetTicks(); // Lưu thời gian bắt đầu tạm dừng
+                        else
+                            elapsedPausedTime += SDL_GetTicks() - pauseStartTime; // Cộng thời gian tạm dừng
                     }
-                    else if (countdownTime > 0)
+                    else 
                     {
                         // Khởi động lại countdown
                         startTime = SDL_GetTicks();
                         elapsedPausedTime = 0;
                         paused = false;
                         alarmPlayed = false;
+                        // Dừng âm thanh ngay lập tức
+                        Mix_HaltChannel(-1);
                     }
                 }
 
                 // Nếu nhấn nút "Reset", khởi động lại countdown
-                if (checkClickButton(x, y, resetButton)) return true;
+                if (checkClickButton(x, y, resetButton))
+                {
+                    // Dừng âm thanh ngay lập tức
+                    Mix_HaltChannel(-1);
+                    return true;
+                }
             }
         }
 
@@ -79,7 +97,8 @@ bool runCountdown(SDL_Window *window, SDL_Renderer *renderer, int &countdownTime
         {
             // Tính toán thời gian còn lại
             int remainingTime = countdownTime - (SDL_GetTicks() - startTime - elapsedPausedTime) / 1000;
-            if (remainingTime < 0) remainingTime = 0;
+            if (remainingTime < 0)
+                remainingTime = 0;
 
             lastRemainingTime = remainingTime;
             // Xóa renderer với màu nền
@@ -136,7 +155,7 @@ bool runCountdown(SDL_Window *window, SDL_Renderer *renderer, int &countdownTime
     TTF_CloseFont(font);
     TTF_CloseFont(textFont);
     Mix_FreeChunk(alarm);
-    
+
     // Kết thúc hàm
     return false;
 }
